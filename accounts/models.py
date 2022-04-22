@@ -19,11 +19,15 @@ class Product(models.Model):
     category = models.CharField(max_length=MAX_LENGTH, null=True, choices=CATEGORY)
     description = models.CharField(max_length=MAX_LENGTH, null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True)
-    tags = models.CharField(max_length=MAX_LENGTH, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
+class Tag(models.Model):
+	name = models.CharField(max_length=MAX_LENGTH, null=True)
+
+	def __str__(self):
+		return self.name
 class Order(models.Model):
     STATUS = (
         ('Pending', 'Pending'),
@@ -35,11 +39,7 @@ class Order(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     status = models.CharField(max_length=MAX_LENGTH, null=True, choices=STATUS)
     note = models.CharField(max_length=1000, null=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
 
 
-class Tag(models.Model):
-	name = models.CharField(max_length=MAX_LENGTH, null=True)
-
-	def __str__(self):
-		return self.name
