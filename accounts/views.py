@@ -3,6 +3,7 @@ from .models import *
 
 
 from django.http import HttpResponse
+from .forms import OrderForm
 # Create your views here.
 def home(r):
     orders = Order.objects.all()
@@ -24,4 +25,20 @@ def customer(r, pk):
     order_count = orders.count()
     context = {'customer': customer, 'orders': orders, 'order_count': order_count}
     return render(r, 'accounts/customer.html', context)
+
+def create_order(r):
+    #customer = Customer.objects.get(id=pk)
+    form = OrderForm(r.POST or None)
+    if form.is_valid():
+        form.save()
+    context = {'form': form, 'customer': customer}
+    return render(r, 'accounts/order_form.html', context)
+
+
+
+
+
+
+
+
 
