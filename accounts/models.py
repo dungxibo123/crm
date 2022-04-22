@@ -41,5 +41,8 @@ class Order(models.Model):
     note = models.CharField(max_length=1000, null=True)
     tags = models.ManyToManyField(Tag, blank=True)
 
+    def __str__(self):
+        return self.product.name
+
 
 
