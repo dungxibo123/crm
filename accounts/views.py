@@ -26,9 +26,9 @@ def customer(r, pk):
     context = {'customer': customer, 'orders': orders, 'order_count': order_count}
     return render(r, 'accounts/customer.html', context)
 
-def create_order(r):
-    #customer = Customer.objects.get(id=pk)
-    form = OrderForm(r.POST or None)
+def create_order(r,pk):
+    customer = Customer.objects.get(id=pk)
+    form = OrderForm(r.POST or None, initial={'customer': customer})
     if form.is_valid():
         form.save()
     context = {'form': form, 'customer': customer}
