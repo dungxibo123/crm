@@ -94,6 +94,10 @@ def register_page(r):
             username = form.cleaned_data.get('username')
             group = Group.objects.get(name='Customer')
             user.groups.add(group)
+            Customer.objects.create(
+                user=user,
+            #    name=user.username,
+            )
             messages.success(r, 'Account created successfully for' + username)
             return redirect('/login')
     context = {}
@@ -106,13 +110,20 @@ def login_page(r):
         user = authenticate(r, username=username, password=password)
         if user is not None:
             login(r, user)
-            return redirect('/')
+            return redirect('/user')
         else:
             messages.info(r, 'Username or Password is incorrect')
     context = {}
     return render(r, 'accounts/login.html')
+@login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin', 'Customer'])
 def user_page(r):
-    context = {}
+    orders = r.user.customer.order_set.all()
+     
+    total_order = orders.count()
+    delivered = orders.filter(status='Delivered').count()
+    pending = orders.filter(status='Pending').count()
+    context = {'orders': orders, 'total_order': total_order, 'delivered': delivered, 'pending': pending}
     return render(r, 'accounts/user.html', context)
 
 
