@@ -71,6 +71,8 @@ def register_page(r):
         form = UserCreationForm(data=r.POST)
         if form.is_valid():
             form.save()
+            user = form.cleaned_data.get('username')
+            messages.success(r, 'Account created successfully for' + user)
             return redirect('/login')
     context = {}
     return render(r, 'accounts/register.html')
