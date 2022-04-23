@@ -127,22 +127,17 @@ def user_page(r):
     return render(r, 'accounts/user.html', context)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin', 'Customer'])
+def account_settings(r):
+    customer = r.user.customer
+    form = CustomerForm(r.POST or None, instance=customer)
+    if r.method == 'POST':
+        form = CustomerForm(r.POST or None, instance=customer)
+        if form.is_valid():
+            form.save()
+    context = {'form': form}
+    return render(r, 'accounts/account_settings.html', context)
 
 
 
