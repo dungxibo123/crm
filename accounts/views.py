@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import *
 from .filter import OrderFilter
+from django.contrib.auth.forms import UserCreationForm
 
 
 
@@ -63,5 +64,40 @@ def create_customer(r):
         form.save()
     context = {'form': form}
     return render(r, 'accounts/customer_form.html', context)
+
+def register_page(r):
+    form = UserCreationForm()
+    if r.method == 'POST':
+        form = UserCreationForm(data=r.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/login')
+    context = {}
+    return render(r, 'accounts/register.html')
+def login_page(r):
+    context = {}
+    return render(r, 'accounts/login.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
