@@ -1,5 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import *
+from .filter import OrderFilter
+
 
 
 from django.http import HttpResponse
@@ -22,8 +24,11 @@ def products(r):
 def customer(r, pk):
     customer = Customer.objects.get(id=pk)
     orders = customer.order_set.all()
+    filt = OrderFilter(r.GET, queryset=orders)
+    orders = filt.qs
+
     order_count = orders.count()
-    context = {'customer': customer, 'orders': orders, 'order_count': order_count}
+    context = {'customer': customer, 'orders': orders, 'order_count': order_count, "filter": filt}
     return render(r, 'accounts/customer.html', context)
 
 def create_order(r,pk):
