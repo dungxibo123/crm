@@ -2,6 +2,10 @@ from django.db import models
 MAX_LENGTH = 200
 # Create your models here.
 class Customer(models.Model):
+    user = models.OneToOneField(
+        'auth.User', null=True,
+        on_delete=models.CASCADE,
+    )
     name = models.CharField(max_length=MAX_LENGTH, null=True)
     phone = models.CharField(max_length=MAX_LENGTH, null=True)
     email = models.CharField(max_length=MAX_LENGTH, null=True)

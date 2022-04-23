@@ -5,13 +5,17 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.contrib import messages
 from django.http import HttpResponse
 from .forms import OrderForm, CustomerForm
+from .decorators import *
 # Create your views here.
 
 
 
 @login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin', 'Customer'])
 def home(r):
     orders = Order.objects.all()
     customer = Customer.objects.all()
@@ -23,6 +27,13 @@ def home(r):
     context = {'orders': orders, 'customers': customer, 'total_customer': total_customer,
                'total_order': total_order, 'delivered': delivered, 'pending': pending}
     return render(r, './accounts/dashboard.html', context )
+
+
+def logout_user(r):
+    logout(r)
+    return redirect('/login')
+
+
 def products(r):
     products = Product.objects.all()
     return render(r, 'accounts/products.html', {'products': products})
@@ -36,6 +47,7 @@ def customer(r, pk):
     context = {'customer': customer, 'orders': orders, 'order_count': order_count, "filter": filt}
     return render(r, 'accounts/customer.html', context)
 @login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin','Customer'])
 def create_order(r,pk):
     customer = Customer.objects.get(id=pk)
     form = OrderForm(r.POST or None, initial={'customer': customer})
@@ -44,6 +56,7 @@ def create_order(r,pk):
     context = {'form': form, 'customer': customer}
     return render(r, 'accounts/order_form.html', context)
 @login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin'])
 def update_order(r, pk):
     order = Order.objects.get(id=pk)
     form = OrderForm(r.POST or None, instance=order)
@@ -53,6 +66,8 @@ def update_order(r, pk):
     return render(r, 'accounts/order_form.html', context)
 
 
+@login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin'])
 def delete_order(r, pk):
     order = Order.objects.get(id=pk)
     if r.method == 'POST':
@@ -61,28 +76,29 @@ def delete_order(r, pk):
     context = {'item': order}
     return render(r, 'accounts/delete.html', context)
 
-
+@login_required(login_url='/login')
+@allowed_users(allowed_roles=['admin'])
 def create_customer(r):
     form = CustomerForm(r.POST or None)
     if form.is_valid():
         form.save()
     context = {'form': form}
     return render(r, 'accounts/customer_form.html', context)
-
+@unauthenticated_user
 def register_page(r):
-    if r.user.is_authenticated:
-        return redirect('/')
-    else:
-        form = UserCreationForm()
-        if r.method == 'POST':
-            form = UserCreationForm(data=r.POST)
-            if form.is_valid():
-                form.save()
-                user = form.cleaned_data.get('username')
-                messages.success(r, 'Account created successfully for' + user)
-                return redirect('/login')
-        context = {}
-        return render(r, 'accounts/register.html')
+    form = UserCreationForm()
+    if r.method == 'POST':
+        form = UserCreationForm(data=r.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            group = Group.objects.get(name='Customer')
+            user.groups.add(group)
+            messages.success(r, 'Account created successfully for' + username)
+            return redirect('/login')
+    context = {}
+    return render(r, 'accounts/register.html')
+@unauthenticated_user
 def login_page(r):
     if r.method == 'POST':
         username = r.POST.get('username')
@@ -95,7 +111,9 @@ def login_page(r):
             messages.info(r, 'Username or Password is incorrect')
     context = {}
     return render(r, 'accounts/login.html')
-
+def user_page(r):
+    context = {}
+    return render(r, 'accounts/user.html', context)
 
 
 
